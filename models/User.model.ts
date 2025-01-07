@@ -1,44 +1,24 @@
-import { Schema, model, models, Document } from "mongoose";
+import mongoose, { Schema, model, models } from "mongoose";
 import bcrypt from "bcryptjs";
 
-interface IUser {
+export interface IUser {
   email: string;
-  username: string;
-  role: "user" | "admin";
   password: string;
+  role: "user" | "admin";
+  _id?: mongoose.Types.ObjectId;
   createdAt?: Date;
   updatedAt?: Date;
 }
 
-// Extend Mongoose's Document to include IUser and its methods
-interface IUserDocument extends IUser, Document {
-  isModified(path: string): boolean; // Add isModified method
-}
-
-const userSchema = new Schema<IUserDocument>(
+const userSchema = new Schema<IUser>(
   {
-    email: {
-      type: String,
-      required: true,
-      unique: true,
-      lowercase: true,
-    },
-    username: {
-      type: String,
-      unique: true,
-      lowercase: true,
-    },
-    role: {
-      type: String,
-      enum: ["user", "admin"],
-      default: "user",
-    },
+    email: { type: String, required: true, unique: true },
     password: { type: String, required: true },
+    role: { type: String, enum: ["user", "admin"], default: "user" },
   },
   { timestamps: true }
 );
 
-// Hash the password before saving
 userSchema.pre("save", async function (next) {
   if (this.isModified("password")) {
     this.password = await bcrypt.hash(this.password, 10);
@@ -46,7 +26,6 @@ userSchema.pre("save", async function (next) {
   next();
 });
 
-// Export the model
-const User = models?.User || model<IUserDocument>("User", userSchema);
+const User = models?.User || model<IUser>("User", userSchema);
 
 export default User;
