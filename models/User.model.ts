@@ -47,6 +47,6 @@ userSchema.pre("save", async function (next) {
 });
 
 // Export the model
-const User = models.User || model<IUserDocument>("User", userSchema);
+const User = models?.User || model<IUserDocument>("User", userSchema);
 
 export default User;
