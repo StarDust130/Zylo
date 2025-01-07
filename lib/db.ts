@@ -1,6 +1,6 @@
 import mongoose from "mongoose";
 
-const MONOGODB_URL = process.env.MONGODB_URL;
+const MONOGODB_URL = process.env.MONGODB_URL!;
 
 if (!MONOGODB_URL) {
   throw new Error("Check your MongoDB URL 😿");
@@ -13,4 +13,27 @@ if (!cached) {
 }
 
 export async function connectToDatabase() {
+  if (cached.conn) {
+    return cached.conn;
+  }
+
+  if (!cached.promise) {
+    const opts = {
+      bufferCommands: true,
+      maxPoolSize: 10,
+    };
+
+    cached.promise = mongoose.connect(MONOGODB_URL, opts).then(() => {
+      return mongoose.connection;
+    });
+  }
+
+  try {
+    cached.conn = await cached.promise;
+  } catch (error) {
+    cached.promise = null;
+    console.error("Error connecting to MongoDB: 😢 💢", error);
+  }
+
+  return cached.conn;
 }
