@@ -1,17 +1,21 @@
-import mongoose, { Schema, model, models } from "mongoose";
+import { Schema, model, models, Document } from "mongoose";
 import bcrypt from "bcryptjs";
 
-export interface IUser {
+interface IUser {
   email: string;
   username: string;
   role: "user" | "admin";
   password: string;
-  _id?: mongoose.Types.ObjectId;
   createdAt?: Date;
   updatedAt?: Date;
 }
 
-const userSchema = new Schema<IUser>(
+// Extend Mongoose's Document to include IUser and its methods
+interface IUserDocument extends IUser, Document {
+  isModified(path: string): boolean; // Add isModified method
+}
+
+const userSchema = new Schema<IUserDocument>(
   {
     email: {
       type: String,
@@ -34,13 +38,15 @@ const userSchema = new Schema<IUser>(
   { timestamps: true }
 );
 
-userSchema.pre<IUser>("save", async function (next) {
+// Hash the password before saving
+userSchema.pre("save", async function (next) {
   if (this.isModified("password")) {
     this.password = await bcrypt.hash(this.password, 10);
   }
   next();
 });
 
-const User = models.User || model<IUser>("User", userSchema);
+// Export the model
+const User = models.User || model<IUserDocument>("User", userSchema);
 
 export default User;
