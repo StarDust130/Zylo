@@ -41,7 +41,7 @@ export const authOptions: NextAuthOptions = {
 
           // 3) Return user
           return {
-            id: user.id,
+            id: user._id.toSring(),
             email: user.email,
             role: user.role,
           };
