@@ -1,6 +1,6 @@
 "use client";
 import React from "react";
-import { ImageKitProvider, IKImage } from "imagekitio-next";
+import { ImageKitProvider } from "imagekitio-next";
 import { SessionProvider } from "next-auth/react";
 
 const urlEndpoint = process.env.NEXT_PUBLIC_URL_ENDPOINT;
