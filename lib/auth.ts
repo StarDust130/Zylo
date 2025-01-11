@@ -39,9 +39,12 @@ export const authOptions: NextAuthOptions = {
             throw new Error("Invalid password");
           }
 
+          console.log("User", user._id);
+          
+
           // 3) Return user
           return {
-            id: user._id.toSring(),
+            id: user._id,
             email: user.email,
             role: user.role,
           };
