@@ -1,4 +1,4 @@
-import { NextRequest } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 import crypto from "crypto";
 import { connectToDatabase } from "@/lib/db";
 import Order from "@/models/Order.model";
@@ -55,7 +55,10 @@ export async function POST(req: NextRequest) {
         });
       }
     }
+
+    return NextResponse.json({ message: "success" }, { status: 200 });
   } catch (error) {
     console.log(error);
+    return new Response("Internal Server Error", { status: 500 });
   }
 }
