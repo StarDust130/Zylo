@@ -51,14 +51,16 @@ export async function POST(req: NextRequest) {
 
     // 4) Return the order details
     return NextResponse.json({
-      order: {
-        id: newOrder.id,
-        razorpayOrderId: order.id,
-        amount: order.amount,
-        currency: order.currency,
-      },
+      dbOrderID: newOrder._id,
+      orderId: order.id,
+      amount: order.amount,
+      currency: order.currency,
     });
   } catch (error) {
     console.error(error);
+    return NextResponse.json(
+      { error: "Something went wrong 😭" },
+      { status: 500 }
+    );
   }
 }
