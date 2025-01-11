@@ -6,10 +6,13 @@ import nodemailer from "nodemailer";
 
 export async function POST(req: NextRequest) {
   try {
+    // 1) Get the request body
     const body = await req.text();
 
+    // 2) Get the signature from the headers
     const signature = req.headers.get("x-razorpay-signature");
 
+    // 3) Verify the signature
     const expectedSignature = crypto
       .createHmac("sha256", process.env.RAZORPAY_SECRET_KEY!)
       .update(body)
@@ -19,13 +22,16 @@ export async function POST(req: NextRequest) {
       return new Response("Invalid Signature", { status: 400 });
     }
 
+    // 4) Parse the event
     const event = JSON.parse(body);
 
     await connectToDatabase();
 
+    // 5) Handle the event
     if (event.event === "payment.captured") {
       const payment = event.payload.payment.entity;
 
+      // Update the order
       const order = await Order.findOneAndUpdate(
         { razorpayOrderId: payment.order_id },
         {
@@ -38,6 +44,7 @@ export async function POST(req: NextRequest) {
       ]);
 
       if (order) {
+        // Send an email to the user
         const transporter = nodemailer.createTransport({
           host: process.env.SMTP_HOST!,
           port: parseInt(process.env.SMTP_PORT!),
