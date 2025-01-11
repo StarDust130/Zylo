@@ -1,6 +1,6 @@
 import { authOptions } from "@/lib/auth";
 import { connectToDatabase } from "@/lib/db";
-import Product from "@/models/Product.model";
+import Product, { IProduct } from "@/models/Product.model";
 import { getServerSession } from "next-auth";
 import { NextRequest, NextResponse } from "next/server";
 
@@ -21,6 +21,7 @@ export async function GET() {
     // 2) Return the products 💲
     return NextResponse.json(products, { status: 200 });
   } catch (error) {
+    console.error(error);
     throw new Error(`Failed to connect to database: ${error}`);
   }
 }
@@ -37,12 +38,27 @@ export async function POST(req: NextRequest) {
 
     await connectToDatabase();
 
-    // 2) Create a new product
-    const product = await Product.create(req.body);
+    // 2) Get data from the request
+    const body: IProduct = await req.json();
 
-    // 2) Return the newly created product 🎉
+    if (
+      !body.name ||
+      !body.imageUrl ||
+      !body.description ||
+      body.variants.length === 0
+    ) {
+      return NextResponse.json(
+        { message: "Please provide all the required fields" },
+        { status: 400 }
+      );
+    }
+    // 3) Create a new product
+    const product = await Product.create(body);
+
+    // 4) Return the newly created product 🎉
     return NextResponse.json(product, { status: 201 });
   } catch (error) {
+    console.error(error);
     throw new Error(`Failed to connect to database: ${error}`);
   }
 }
